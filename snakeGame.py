@@ -1,9 +1,6 @@
 # Snake Game !
 
-import pygame
-import sys
-import random
-import time
+import pygame,sys,random,time
 #Check for errors
 check_errors=pygame.init()
 #(6 , 0)
@@ -36,7 +33,7 @@ foodSpawn = True
 
 direction = 'RIGHT'
 changeto = direction
-
+score = 0
 #Gameover function
 def gameOver():
     myFont = pygame.font.SysFont('monaco',72)
@@ -44,10 +41,21 @@ def gameOver():
     GOrect = GOsurf.get_rect()
     GOrect.midtop = (360,15)
     playSurface.blit(GOsurf,GOrect)
+    showscore(0)
     pygame.display.flip()
     time.sleep(4)
     pygame.quit() #pygame exit
     sys.exit() #console exit
+#Score function
+def showscore(choice=1):
+    sFont = pygame.font.SysFont('monaco',24)
+    Ssurf = sFont.render("Score : {0}".format(score),True,black)
+    Srect = Ssurf.get_rect()
+    if choice ==1:
+        Srect.midtop = (80, 10)
+    else:
+        Srect.midtop = (360, 120)
+    playSurface.blit(Ssurf,Srect)
 
 #Main Logic of the game
 while 1:
@@ -65,7 +73,7 @@ while 1:
             if event.key == pygame.K_DOWN or event.key == ord('s'):
                 changeto = "DOWN"
             if event.key == pygame.K_ESCAPE:
-                pygame.event.post(pygame.event.Event(QUIT))
+                pygame.event.post(pygame.event.Event(pygame.QUIT))
 
 # Validation of direction
     if changeto == "RIGHT" and not direction == "LEFT":
@@ -91,6 +99,7 @@ while 1:
     snakeBody.insert(0,list(snakePos))
     if snakePos[0] == foodPos[0] and snakePos[1] == foodPos[1]:
         foodSpawn = False
+        score+=1
     else:
         snakeBody.pop()
 #Food Spawn
@@ -102,9 +111,15 @@ while 1:
     for pos in snakeBody:
         pygame.draw.rect(playSurface,green,pygame.Rect(pos[0],pos[1],10,10))
     pygame.draw.rect(playSurface,brown,pygame.Rect(foodPos[0],foodPos[1],10,10))
+#Bound
     if snakePos[0] > 710 or snakePos[0] < 0:
         gameOver()
     if snakePos[1] > 450 or snakePos[1] < 0:
         gameOver()
+#Eating Tail
+    for block in snakeBody[1:]:
+        if snakePos[0] == block[0] and snakePos[1] == block[1]:
+            gameOver()
+    showscore()
     pygame.display.update()
     fpsController.tick(20)
